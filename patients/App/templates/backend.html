@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+<!-- Navbar content(icon + title) --> 
+{% block navbar-content %}
+<i class="fas fa-hospital-user"></i>&nbsp; &nbsp; Patients
+{% endblock navbar-content %}
+
+<!-- Button in navbar -->
+{% block btn-nav %}
+<a href="{% url 'logout' %}" class="btn btn-outline-danger btn-sm border-light text-light" id="btn-nav">Logout</a>
+{% endblock btn-nav %}
+
+{% block content %}
+<div class="container">
+    
+    
+    <br><br>
+
+    <!-- 'Add button' and 'Get username' -->
+    <div class="d-flex justify-content-between">
+        <a href="{% url 'add_patient' %}" class="btn btn-outline-primary btn-sm"><i class="fas fa-plus"></i>&nbsp;&nbsp; Add Patient</a>
+        <span>
+            Welcome: <strong><span class="text-primary">{{ user.get_username }}</span></strong>
+        </span>
+    </div>
+
+
+    <!-- Input Search + Button Search + Button Reset -->
+    <form method="GET">
+        <div class="input-group input-group-sm mb-3 mt-4">
+            <input name="q" type="text" class="form-control" placeholder="Search for..." value="{{ request.GET.q }}">
+            <button class="btn btn-secondary"><i class="fas fa-search"></i></button>
+            <a href="{% url 'backend' %}" class="btn btn-dark" style="margin-left: 2px;"><i class="fas fa-sync-alt"></i></a>
+        </div>
+    </form>
+
+
+    <!-- Table -->
+    <center>
+        <table class="table table-bordered table-sm mt-4" style="text-align: center; font-size: 14px;">
+            <thead class="table-primary">
+                <tr>
+                    <th style="width: 21%;">Name</th>
+                    <th style="width: 15%;">Phone</th>
+                    <th style="width: 21%;">Email</th>
+                    <th style="width: 8%;">Age</th>
+                    <th style="width: 7%;">Gender</th>
+                    <th style="width: 18%;">Registered</th>
+                    <th style="width: 10%;" colspan="2">Actions</th>
+                </tr>
+            </thead>
+            
+            <!-- Data from backend -->
+            {% for patient in patients %}
+            <tr>
+                <td>{{ patient.name }}</td>
+                <td>{{ patient.phone }}</td>
+                <td>{{ patient.email }}</td>
+                <td>{{ patient.age }}</td>
+                <td>{{ patient.gender }}</td>
+                <td>{{ patient.created_at | date:'m/d/Y (H:i)' }}</td>
+                <td>
+                    <a class="btn btn-primary" href="/patient/{{ patient.id }}" title="Edit patient">
+                        <i class="fas fa-pen"></i>
+                    </a>
+                </td>
+                <td>
+                    <a class="btn btn-secondary" href="/delete_patient/{{ patient.id }}" title="Delete patient">
+                        <i class="fas fa-trash-alt"></i>
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </center>
+
+
+    <!-- Pagination -->
+    <nav class="mt-4">
+        {% if patients.has_other_pages %}
+        <ul class="pagination justify-content-left">
+            {% if patients.has_previous %}
+            <a href="?page=1" class="btn btn-outline-primary" style="width: 60px; border-radius: 1px; border: 1px solid #d3d3d3;">First</a>
+            <li class="page-item"><a class="page-link" href="?page={{ patients.previous_page_number }}"><i class="fas fa-angle-double-left"></i></a></li>
+            {% else %}
+            <li class="page-item disabled"></li>
+            {% endif %}
+            
+            {% for i in patients.paginator.page_range %}
+                {% if patients.number == i %}
+                <li class="page-item active"><span class="page-link">{{ i }}<span class="sr-only"></span></span></li>
+            
+                {% else %}
+                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if patients.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ patients.next_page_number }}"><i class="fas fa-angle-double-right"></i></a></li>
+            <a href="?page={{ patients.paginator.num_pages }}" class="btn btn-outline-primary" style="width: 60px; border-radius: 1px; border: 1px solid #d3d3d3;">Last</a>
+            {% else %}
+            <li class="page-item disabled"></li>
+            {% endif %}
+        </ul>
+        {% endif %}
+    </nav>
+
+
+    {% for message in messages %}
+    {% if message.tags == 'success' %}
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script>
+        var m = "{{ message }}";
+        swal('Perfect !', m, 'success')
+    </script>
+    {% endif %}
+    {% endfor %}
+    
+</div> <!-- End container  --> 
+{% endblock content %}
